@@ -30,6 +30,7 @@ import {
   Row,
   Col,
   Card,
+  Fab,
 } from 'native-base';
 import {Icon as Icn, Button} from 'react-native-elements';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
@@ -45,6 +46,7 @@ export default class Home extends Component {
     super(props);
     this.drawer = this.drawer.bind(this);
     this.state = {
+     fab_active: false,
      latitude: LATITUDE,
       longitude: LONGITUDE,
       routeCoordinates: [],
@@ -223,12 +225,27 @@ export default class Home extends Component {
           </MapView>
         <View style={styles.buttonContainer}>
        
-         <Image style={styles.img_style} source={start} />
-          <Image style={styles.img_style} source={stop} />
+          
           <Text style={{fontSize:25,fontFamily:font_title,color:colors.theme_white,marginLeft:10}}>
             {parseFloat(this.state.distanceTravelled).toFixed(2)} km
           </Text>   
-        </View> 
+
+        </View>
+          <Fab
+            active={this.state.fab_active}
+            direction="left"
+            containerStyle={{ marginBottom:135 }}
+            style={{ backgroundColor: "#40E0D0" }}
+            position="bottomRight"
+            onPress={() => this.setState({ fab_active: !this.state.fab_active })}>
+            <Icn name="people" style={{ color:colors.theme_bg }}/>
+            <Button style={{ backgroundColor: '#40E0D0' }}>
+              <Icn name="pause" type='antdesign' style={{ color:'#40E0D0' }}/>
+            </Button>
+            <Button style={{ backgroundColor: '#40E0D0' }}>
+              <Icn name="playcircleo" type='antdesign' style={{ color:'#40E0D0'}}/>
+            </Button>
+          </Fab> 
         </View>
         
       </Container>
@@ -248,7 +265,7 @@ const styles = StyleSheet.create({
   },
   map: {
     width:'100%',
-    height:'80%'
+    height:'85%',
   },
   title: {
     fontSize: 23,
