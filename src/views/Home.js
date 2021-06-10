@@ -1,292 +1,273 @@
-import React from 'react';
-import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { useTheme } from '@react-navigation/native';
+import React, { Component } from 'react';
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Text,
+  Image,
+  TouchableOpacity,
+  Platform,
+  PermissionsAndroid,
+} from 'react-native'; 
+import {GOOGLE_KEY, font_title,font_description,start,stop} from '../config/Constants';
+import MapView, {
+  Marker,
+  AnimatedRegion,
+  Polyline,
+  PROVIDER_GOOGLE
+} from "react-native-maps";
+import haversine from "haversine";
+import * as colors from '../assets/css/Colors';
+import {StatusBar} from '../components/GeneralComponents';
+import Geolocation from '@react-native-community/geolocation';
+import {
+  Content,
+  Container,
+  Header,
+  Body,
+  Title,
+  Left,
+  Row,
+  Col,
+  Card,
+} from 'native-base';
+import {Icon as Icn, Button} from 'react-native-elements';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
+// const LATITUDE = 29.95539;
+// const LONGITUDE = 78.07513;
+const LATITUDE_DELTA = 0.009;
+const LONGITUDE_DELTA = 0.009;
+const LATITUDE = 37.78825;
+const LONGITUDE = -122.4324;
 
-const mapDarkStyle = [
-  {
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#212121"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#212121"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.country",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#9e9e9e"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.land_parcel",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-  {
-    "featureType": "administrative.locality",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#bdbdbd"
-      }
-    ]
-  },
-  {
-    "featureType": "poi",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#181818"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "featureType": "poi.park",
-    "elementType": "labels.text.stroke",
-    "stylers": [
-      {
-        "color": "#1b1b1b"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "geometry.fill",
-    "stylers": [
-      {
-        "color": "#2c2c2c"
-      }
-    ]
-  },
-  {
-    "featureType": "road",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#8a8a8a"
-      }
-    ]
-  },
-  {
-    "featureType": "road.arterial",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#373737"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#3c3c3c"
-      }
-    ]
-  },
-  {
-    "featureType": "road.highway.controlled_access",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#4e4e4e"
-      }
-    ]
-  },
-  {
-    "featureType": "road.local",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#616161"
-      }
-    ]
-  },
-  {
-    "featureType": "transit",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#757575"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "geometry",
-    "stylers": [
-      {
-        "color": "#000000"
-      }
-    ]
-  },
-  {
-    "featureType": "water",
-    "elementType": "labels.text.fill",
-    "stylers": [
-      {
-        "color": "#3d3d3d"
-      }
-    ]
+export default class Home extends Component {
+  constructor(props) {
+    super(props);
+    this.drawer = this.drawer.bind(this);
+    this.state = {
+     latitude: LATITUDE,
+      longitude: LONGITUDE,
+      routeCoordinates: [],
+      distanceTravelled: 0,
+      prevLatLng: {},
+      coordinate: new AnimatedRegion({
+        latitude: LATITUDE,
+        longitude: LONGITUDE,
+        latitudeDelta: 0,
+        longitudeDelta: 0
+      })
+    };
   }
-];
 
-const mapStandardStyle = [
-  {
-    "elementType": "labels.icon",
-    "stylers": [
-      {
-        "visibility": "off"
-      }
-    ]
-  },
-];
+  drawer = () => {
+    this.props.navigation.toggleDrawer();
+  };
 
-const Home = () => {
-  const theme = useTheme();
 
-    return (
-        <MapView
-          provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-          style={styles.map}
-          customMapStyle={ theme.dark ? mapDarkStyle : mapStandardStyle}
-          region={{
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.015,
-            longitudeDelta: 0.0121,
-          }}
-        >
-          <Marker 
-            coordinate={{
-              latitude: 37.78825,
-              longitude: -122.4324,
-            }}
-            
-            title="Test Title"
-            description="This is the test description"
-          >
-            <Callout tooltip>
-              <View>
-                <View style={styles.bubble}>
-                  <Text style={styles.name}>Favourite Restaurant</Text>
-                  {/* <Text>A short description</Text> */}
-                  <Image 
-                    style={styles.image}
-                    
-                  />
-                </View>
-                <View style={styles.arrowBorder} />
-                <View style={styles.arrow} />
-              </View>
-            </Callout>
-          </Marker>
-        </MapView>
+  enable_gps(){
+    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({interval: 10000, fastInterval: 5000})
+    .then(data => {
+      this.props.navigation.navigate('Home');
+    }).catch(err => {
+       
+    });
+  }
+
+
+   componentDidMount() {
+    // this.requestCameraPermission();
+     Geolocation.getCurrentPosition(
+      position => {
+        this.setState({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          error: null
+        });
+      },
+      error => this.setState({ error: error.message }),
+      { enableHighAccuracy: false, timeout: 200000, maximumAge: 1000 }
     );
-};
+    const { coordinate } = this.state;
+    this.watchID =  Geolocation.watchPosition(
+      position => {
+        const { routeCoordinates, distanceTravelled } = this.state;
+        const { latitude, longitude } = position.coords;
 
-export default Home;
+        const newCoordinate = {
+          latitude,
+          longitude
+        };
+        console.log({ newCoordinate });
+
+        if (Platform.OS === "android") {
+          if (this.marker) {
+            this.marker._component.animateMarkerToCoordinate(
+              newCoordinate,
+              500
+            );
+          }
+        } else {
+          coordinate.timing(newCoordinate).start();
+        }
+
+        this.setState({
+          latitude,
+          longitude,
+          routeCoordinates: routeCoordinates.concat([newCoordinate]),
+          distanceTravelled:
+            distanceTravelled + this.calcDistance(newCoordinate),
+          prevLatLng: newCoordinate
+        });
+      },
+      error => console.log(error),
+      {
+        enableHighAccuracy: true,
+        timeout: 20000,
+        maximumAge: 1000,
+        distanceFilter: 10
+      }
+    );
+  }
+
+  componentWillUnmount() {
+   Geolocation.clearWatch(this.watchID);
+  }
+
+  getMapRegion = () => ({
+    latitude: this.state.latitude,
+    longitude: this.state.longitude,
+    latitudeDelta: LATITUDE_DELTA,
+    longitudeDelta: LONGITUDE_DELTA
+  });
+
+  calcDistance = newLatLng => {
+    const { prevLatLng } = this.state;
+    return haversine(prevLatLng, newLatLng) || 0;
+  };
+
+  requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Location Access Permission",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("You can use the camera");
+      } else {
+        console.log("Camera permission denied");
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  render() {
+    return (
+        <Container>
+        <View>
+          <StatusBar />
+        </View>
+        <Header
+          androidStatusBarColor={colors.theme_bg}
+          style={{
+            backgroundColor: colors.theme_bg,
+            toolbarDefaultBorder: '#FFFFFF',
+          }}>
+          <Row>
+            <Col
+              style={{
+                height: '100%',
+                width: '15%',
+                alignSelf: 'center',
+                justifyContent: 'center',
+              }}>
+              <Left style={styles.header}>
+                <Icn
+                  onPress={() => this.props.navigation.toggleDrawer()}
+                  name="menu"
+                  type="fontawesome"
+                  size={30}
+                  color="#FFFFFF"
+                />
+              </Left>
+            </Col>
+            <Col style={{height: '100%', width: '85%', alignSelf: 'center'}}>
+              <Body>
+                <Title style={styles.title}>Tracking</Title>
+              </Body>
+            </Col>
+          </Row>
+        </Header>
+        <View style={styles.container}>
+       
+          <MapView
+            style={styles.map}
+            provider={PROVIDER_GOOGLE}
+            showUserLocation
+            followUserLocation
+            loadingEnabled
+            region={this.getMapRegion()}
+          >
+            <Polyline coordinates={this.state.routeCoordinates} strokeWidth={6} />
+            <Marker coordinate={this.getMapRegion()} >
+              <Image
+                source={require(".././assets/img/person.png")}
+                style={{ height: 50, width: 50 }}
+              />
+            </Marker>
+          </MapView>
+        <View style={styles.buttonContainer}>
+       
+         <Image style={styles.img_style} source={start} />
+          <Image style={styles.img_style} source={stop} />
+          <Text style={{fontSize:25,fontFamily:font_title,color:colors.theme_white,marginLeft:10}}>
+            {parseFloat(this.state.distanceTravelled).toFixed(2)} km
+          </Text>   
+        </View> 
+        </View>
+        
+      </Container>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor:colors.theme_bg
+  },
+  location_markers: {
+    position: 'absolute',
+  },
   map: {
-    height: '100%'
+    width:'100%',
+    height:'80%'
   },
-  // Callout bubble
-  bubble: {
-    flexDirection: 'column',
-    alignSelf: 'flex-start',
-    backgroundColor: '#fff',
-    borderRadius: 6,
-    borderColor: '#ccc',
-    borderWidth: 0.5,
-    padding: 15,
-    width: 150,
+  title: {
+    fontSize: 23,
+    fontFamily: font_title,
+    color: '#FFFFFF',
+    marginTop: 15,
+    marginRight: 30,
   },
-  // Arrow below the bubble
-  arrow: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    borderTopColor: '#fff',
-    borderWidth: 16,
+  header: {
     alignSelf: 'center',
-    marginTop: -32,
   },
-  arrowBorder: {
-    backgroundColor: 'transparent',
-    borderColor: 'transparent',
-    borderTopColor: '#007a87',
-    borderWidth: 16,
-    alignSelf: 'center',
-    marginTop: -0.5,
-    // marginBottom: -15
+  buttonContainer: {
+    flexDirection: "row",
+    marginVertical: 20,
+    backgroundColor: "transparent"
   },
-  // Character name
-  name: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  // Character image
-  image: {
-    width: "100%",
-    height: 80,
+   img_style: {
+    marginLeft:10,
+    width: 50,
+    height: 50,
   },
 });

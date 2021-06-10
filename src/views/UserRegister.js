@@ -3,16 +3,17 @@ import {
   View,
   StyleSheet,
   Text,
+  TextInput,
   Image,
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
-import {Container, Header, Left, Right, Content, Body} from 'native-base';
+import {Container, Header, Left, Right, Content, Body, Button, Row, Col} from 'native-base';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {Input, Button} from 'react-native-elements';
+import {Input} from 'react-native-elements';
 import * as colors from '../assets/css/Colors';
 import {CommonActions} from '@react-navigation/native';
-import {font_title, profile_icon, api_url, login} from '../config/Constants';
+import {font_title,font_description, api_url, login,login_logo} from '../config/Constants';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import axios from 'axios';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -26,6 +27,7 @@ export default class UserRegister extends Component {
     this.state = {
       validation: false,
       isLoding: false,
+      password:''
     };
   }
 
@@ -57,26 +59,92 @@ export default class UserRegister extends Component {
         <View>
           <StatusBar />
         </View>
-        <Header androidStatusBarColor={colors.theme_bg} style={styles.header}>
-          <Loader visible={this.state.isLoding} />
-          <Left style={styles.left}>
-            <TouchableOpacity
-              style={{width: 100}}
-              onPress={() => this.handleBackButtonClick()}
-              activeOpacity={1}>
-              <FontAwesome
-                name="chevron-left"
-                size={20}
-                color="black"
-                style={{marginLeft: 10}}
-              />
-            </TouchableOpacity>
-          </Left>
-        </Header>
+
         <Content style={styles.content}>
-          <View style={styles.content}>
-          <Text>Home</Text>
+       
+     
+          <View style={{marginTop:'10%'}} />
+          <View style={{padding:'7%'}}>
+          <Text style={styles.txt_style}>Create Account</Text>
+          <Text style={styles.txt_style2}>Please fill the input blow here</Text>
           </View>
+          <View style={{marginTop:'10%'}} />
+        <View style={{ width: "80%", alignSelf: "center" }}>
+          <TextInput
+                 style={styles.input}
+                 value={this.state.email}
+                 placeholder="User Name"
+                 placeholderTextColor='#808080'
+                 fontWeight='bold'
+                 onChangeText={(TextInputValue) =>
+                  this.setState({ email: TextInputValue })
+                }
+
+              />
+          <Icon style={styles.icon} name="user" size={20} />
+         </View>
+             <View style={{ width: "80%", alignSelf: "center" }}>
+          <TextInput
+                 style={styles.input}
+                 value={this.state.email}
+                 placeholder="Phone Number"
+                 placeholderTextColor='#808080'
+                 fontWeight='bold'
+                 onChangeText={(TextInputValue) =>
+                  this.setState({ email: TextInputValue })
+                }
+
+              />
+          <Icon style={styles.icon} name="phone" size={20} />
+         </View>
+             <View style={{ width: "80%", alignSelf: "center" }}>
+          <TextInput
+                 style={styles.input}
+                 value={this.state.email}
+                 placeholder="Password"
+                 placeholderTextColor='#808080'
+                 fontWeight='bold'
+                 onChangeText={(TextInputValue) =>
+                  this.setState({ email: TextInputValue })
+                }
+
+              />
+          <Icon style={styles.icon} name="lock" size={20} />
+         </View>
+         <View style={{ width: "80%", alignSelf: "center" }}>
+            <TextInput
+                style={styles.input}
+                value={this.state.email}
+                placeholder="Confirm Password"
+                placeholderTextColor='#808080'
+                fontWeight='bold'
+                onChangeText={(TextInputValue) =>
+                    this.setState({ email: TextInputValue })
+                }
+            />  
+             <Icon style={styles.icon} name="key" size={20} />
+         </View>
+              <View style={{ marginTop: "10%" }} />
+          <View style={{ width: "80%", alignSelf: "center" }}>
+              <Button block style={styles.request_button} onPress={this.login}>
+                <Text style={styles.request_button_text}>Sign Up</Text>
+              </Button>
+            </View>
+        <View style ={{margin:20}}/> 
+           <Row >
+             <Col style={{width:'65%'}}>
+              <Text style={styles.signin_text} onPress={this.register}>
+                Already have a account?
+              </Text>
+             </Col>
+             <Col>
+             <Text style={styles.signin_text1} onPress={this.register}>
+              Sign In
+            </Text>
+             </Col>   
+           </Row>
+           
+       
         </Content>
       </Container>
     );
@@ -85,10 +153,7 @@ export default class UserRegister extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.theme_fg,
-  },
-  header: {
-    backgroundColor: colors.theme_white,
+    backgroundColor: '#1f1a30',
   },
   content: {
     padding: '5%',
@@ -97,8 +162,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   txt_style: {
-    fontSize: 35,
+    fontSize: 30,
     fontFamily: font_title,
+    color:colors.theme_white
+  },
+  txt_style2: {
+    fontSize: 17,
+    fontFamily: font_description,
+    color:colors.theme_grey
   },
   buttonStyle: {
     borderRadius: 20,
@@ -107,8 +178,49 @@ const styles = StyleSheet.create({
     backgroundColor: colors.theme_bg,
     alignSelf: 'center',
   },
-  inputStyle: {
-    fontSize: 18
+ input: {
+    alignSelf:'center',
+    height: 55,
+    margin: 12,
+    width:'115%',
+    paddingLeft:'16%',
+    borderRadius:20,
+    borderWidth: 0.5,
+    color:colors.theme_grey,
+    borderColor:'#39304d',
+    backgroundColor:'#39304d',
+  },
+  request_button_text: {
+    color: '#040720',
+    fontSize:15,
+    fontWeight:'bold',
+    letterSpacing: 0.5,
+  },
+  request_button: {
+    backgroundColor: '#40E0D0',
+    alignSelf:'center',
+    height: 55,
+    width:'80%',
+    borderRadius:30
+  },
+  signin_text: {
+    fontSize: 15,
+    fontFamily:font_description,
+    paddingLeft:'25%',
+    color: colors.theme_grey,
+    marginBottom: "4%",
+  },
+  signin_text1: {
+    fontSize: 15,
+    fontFamily:font_title,
+    color: '#40E0D0',
+    fontWeight:'bold',
+    marginBottom: "4%",
+  },
+  icon: {
+    position: 'absolute',
+    color:'#ffffff',
+    marginTop:'10%'
   },
   margin_10: {
     margin: 10,
@@ -117,7 +229,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   img_style: {
-    width: 50,
-    height: 50,
+    marginTop:10,
+    width: 180,
+    height: 100,
   },
 });
