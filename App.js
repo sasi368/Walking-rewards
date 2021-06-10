@@ -15,6 +15,7 @@ import Splash from './src/views/Splash';
 import Home from './src/views/Home';
 import UserLogin from './src/views/UserLogin';
 import UserRegister from './src/views/UserRegister'; 
+import Rewards from './src/views/Rewards'; 
 import Logout from './src/views/Logout';
 
 const Stack = createStackNavigator();
@@ -61,7 +62,7 @@ function MyDrawer() {
       />
       <Drawer.Screen
         name="MyRewards"
-        component={UserLogin}
+        component={Rewards}
         options={{ 
           drawerIcon: ({ tintColor }) => (
               <Icn name='award' type='feather' color={colors.theme_fg} size={25} />
@@ -94,6 +95,7 @@ function App() {
         <Stack.Screen name="Home" component={MyDrawer} />
         <Stack.Screen name="UserLogin" component={UserLogin} />
         <Stack.Screen name="UserRegister" component={UserRegister} />
+        <Stack.Screen name="Rewards" component={Rewards} />
 
 
       </Stack.Navigator>
